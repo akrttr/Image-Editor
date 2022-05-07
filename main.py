@@ -56,6 +56,9 @@ class main_gui(tk.Tk):
         filemenu_edit.add_command(label="Detect Object", command=self.objectDetection, underline=0)
         filemenu_edit.add_command(label="Segmentation", command=self.segmentation, underline=0)
         filemenu_edit.add_command(label="Remove Noise", command=self.median_filter, underline=0)
+        filemenu_edit.add_command(label="Detect Face", command=self.face_recognition, underline=0)
+        filemenu_edit.add_command(label="Change HSV", command=self.hsv_color, underline=0)
+        filemenu_edit.add_command(label="Change LAB", command=self.lab_color, underline=0)
 
     def loadImage(self):
         global input_path
@@ -390,5 +393,47 @@ class main_gui(tk.Tk):
         self.img_modified = ImageTk.PhotoImage(image=resized_image)
         self.lbl_modified = Label(self, bg="green", image=self.img_modified)
         self.lbl_modified.place(relx=0.5, rely=0, relwidth=0.5, relheight=1)
+    
+    def face_recognition(self):
+        faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+        self.gray_image = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
+        self.im_modified = self.img
+        faces = faceCascade.detectMultiScale(
+            self.gray_image,
+            scaleFactor=1.1,
+            minNeighbors=7,
+            minSize=(30, 30),
+            flags=cv2.CASCADE_SCALE_IMAGE
+        )
+        for (x, y, w, h) in faces:
+            cv2.rectangle(self.im_modified, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        width = int(round(self.w / 2, 0))
+        length = int(round(self.h, 0))
+        self.im_modified = Image.fromarray(self.im_modified)
+        resized_image = self.im_modified.resize((width, length), Image.ANTIALIAS)
+        self.im_modified = ImageTk.PhotoImage(image=resized_image)
+        self.lbl_modified = Label(self, bg="green", image=self.im_modified)
+        self.lbl_modified.place(relx=0.5, rely=0, relwidth=0.5, relheight=1)
+    
+    def hsv_color(self):
+        hsv_img = cv2.cvtColor(self.img, cv2.COLOR_BGR2HSV)
+        width = int(round(self.w / 2, 0))
+        length = int(round(self.h, 0))
+        self.im_modified = Image.fromarray(hsv_img)
+        resized_image = self.im_modified.resize((width, length), Image.ANTIALIAS)
+        self.im_modified = ImageTk.PhotoImage(image=resized_image)
+        self.lbl_modified = Label(self, bg="green", image=self.im_modified)
+        self.lbl_modified.place(relx=0.5, rely=0, relwidth=0.5, relheight=1)
+
+    def lab_color(self):
+        lab_img = cv2.cvtColor(self.img, cv2.COLOR_BGR2LAB)
+        width = int(round(self.w / 2, 0))
+        length = int(round(self.h, 0))
+        self.im_modified = Image.fromarray(lab_img)
+        resized_image = self.im_modified.resize((width, length), Image.ANTIALIAS)
+        self.im_modified = ImageTk.PhotoImage(image=resized_image)
+        self.lbl_modified = Label(self, bg="green", image=self.im_modified)
+        self.lbl_modified.place(relx=0.5, rely=0, relwidth=0.5, relheight=1)
+
 gui = main_gui()
 gui.mainloop()
